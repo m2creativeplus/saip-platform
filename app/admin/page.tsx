@@ -1,108 +1,246 @@
 "use client";
+
 import Link from "next/link";
-
-const AGENTS = [
-  { name: "Google Search", status: "completed", records: 145, duration: "2m 34s", last: "2 hours ago" },
-  { name: "Google Maps", status: "completed", records: 87, duration: "3m 12s", last: "2 hours ago" },
-  { name: "Facebook Listings", status: "running", records: 203, duration: "running...", last: "now" },
-  { name: "NLP Normalizer", status: "completed", records: 312, duration: "1m 45s", last: "3 hours ago" },
-  { name: "Vehicle Valuator", status: "completed", records: 50, duration: "0m 52s", last: "6 hours ago" },
-  { name: "Fraud Detector", status: "completed", records: 8, duration: "0m 28s", last: "6 hours ago" },
-];
-
-const MAKE_DIST = [
-  { make: "Toyota", count: 30, pct: 60 },
-  { make: "Honda", count: 10, pct: 20 },
-  { make: "Nissan", count: 5, pct: 10 },
-  { make: "Suzuki", count: 5, pct: 10 },
-];
-
-const CAT_DIST = [
-  { cat: "Car Dealers", icon: "🚗", count: 12 },
-  { cat: "Garages", icon: "🔧", count: 8 },
-  { cat: "Spare Parts", icon: "⚙️", count: 15 },
-  { cat: "Tire Shops", icon: "🛞", count: 5 },
-  { cat: "Fuel Stations", icon: "⛽", count: 10 },
-  { cat: "Car Wash", icon: "🧽", count: 6 },
-  { cat: "Body Repair", icon: "🎨", count: 4 },
-];
+import { useState } from "react";
+import AuthHeaderNav from "@/components/AuthHeaderNav";
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import { Sparkles, Wand2, Image as ImageIcon, Loader2, LayoutDashboard, Database, Activity, MapPin, Users, Settings, LogOut, Search, Bell } from "lucide-react";
 
 export default function AdminPage() {
+  const stats = useQuery(api.functions.getDashboardStats);
+  
+  // Nano Banana Image Gen state
+  const [prompt, setPrompt] = useState("");
+  const [generating, setGenerating] = useState(false);
+  const [generatedImg, setGeneratedImg] = useState<string | null>(null);
+
+  const generateImage = async () => {
+    if (!prompt) return;
+    setGenerating(true);
+    try {
+      const res = await fetch("/api/nano-banana", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setGeneratedImg(data.imageUrl);
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setGenerating(false);
+    }
+  };
+
   return (
-    <div>
-      <nav className="navbar"><div className="navbar-inner">
-        <Link href="/" className="nav-logo">🚗 SAIP <span>.sl</span></Link>
-        <ul className="nav-links">
-          <li><Link href="/">Home</Link></li>
-          <li><Link href="/marketplace">Marketplace</Link></li>
-          <li><Link href="/directory">Directory</Link></li>
-          <li><Link href="/admin" className="active">Dashboard</Link></li>
-        </ul>
-      </div></nav>
-
-      <section className="section">
-        <h1 className="section-title" style={{ fontSize: "2rem" }}>Intelligence <em>Dashboard</em></h1>
-        <p style={{ color: "var(--text-mid)", marginBottom: 24 }}>Real-time overview of SAIP data collection and AI agent performance</p>
-
-        {/* KPI Stats */}
-        <div className="stats-row">
-          <div className="stat-box"><div className="stat-label">Vehicle Listings</div><div className="stat-value">50</div><div className="stat-change">↑ 12 today</div></div>
-          <div className="stat-box green"><div className="stat-label">Businesses</div><div className="stat-value">30</div><div className="stat-change">↑ 5 today</div></div>
-          <div className="stat-box blue"><div className="stat-label">Keywords Active</div><div className="stat-value">547</div><div className="stat-change">10 categories</div></div>
-          <div className="stat-box amber"><div className="stat-label">Fraud Alerts</div><div className="stat-value" style={{ color: "#dc2626" }}>3</div><div className="stat-change" style={{ color: "#dc2626" }}>2 high risk</div></div>
+    <div className="flex bg-[#f5f6fa] min-h-screen">
+      
+      {/* Sidebar - MASS Workshop Style */}
+      <aside className="w-64 bg-white border-r border-gray-200 hidden md:flex flex-col h-screen sticky top-0">
+        <div className="p-6 border-b border-gray-200">
+          <Link href="/" className="text-2xl font-black font-outfit text-gray-900 flex items-center gap-2">
+            <span className="bg-[#c41e1e] text-white p-1.5 rounded-lg">S</span> SAIP
+          </Link>
+          <p className="text-xs text-gray-500 font-medium uppercase tracking-wider mt-2">Control Center</p>
         </div>
+        
+        <div className="flex-1 overflow-y-auto p-4 space-y-1">
+          <Link href="/admin" className="flex items-center gap-3 px-3 py-2.5 bg-red-50 text-[#c41e1e] rounded-lg font-medium">
+            <LayoutDashboard size={18} /> Dashboard
+          </Link>
+          <Link href="/marketplace" className="flex items-center gap-3 px-3 py-2.5 text-gray-600 hover:bg-gray-50 rounded-lg font-medium transition-colors">
+            <Database size={18} /> Marketplace Hub
+          </Link>
+          <Link href="/directory" className="flex items-center gap-3 px-3 py-2.5 text-gray-600 hover:bg-gray-50 rounded-lg font-medium transition-colors">
+            <MapPin size={18} /> Business Directory
+          </Link>
+          <button className="w-full flex items-center gap-3 px-3 py-2.5 text-gray-600 hover:bg-gray-50 rounded-lg font-medium transition-colors">
+            <Activity size={18} /> AI Pipelines
+          </button>
+          <button className="w-full flex items-center gap-3 px-3 py-2.5 text-gray-600 hover:bg-gray-50 rounded-lg font-medium transition-colors">
+            <Users size={18} /> User Accounts
+          </button>
+        </div>
+        
+        <div className="p-4 border-t border-gray-200 space-y-1">
+          <button className="w-full flex items-center gap-3 px-3 py-2.5 text-gray-600 hover:bg-gray-50 rounded-lg font-medium transition-colors">
+            <Settings size={18} /> Settings
+          </button>
+          <button className="w-full flex items-center gap-3 px-3 py-2.5 text-red-600 hover:bg-red-50 rounded-lg font-medium transition-colors">
+            <LogOut size={18} /> Leave Dashboard
+          </button>
+        </div>
+      </aside>
 
-        {/* Vehicle Make Distribution */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginTop: 32 }}>
-          <div style={{ background: "var(--bg-white)", border: "1px solid var(--border-light)", borderRadius: "var(--radius)", padding: 24 }}>
-            <h3 style={{ fontWeight: 700, marginBottom: 16 }}>Vehicle Make Distribution</h3>
-            {MAKE_DIST.map(m => (
-              <div key={m.make} style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
-                <span style={{ width: 70, fontWeight: 500, fontSize: "0.9rem" }}>{m.make}</span>
-                <div style={{ flex: 1, height: 8, background: "#f3f4f6", borderRadius: 4, overflow: "hidden" }}>
-                  <div style={{ width: `${m.pct}%`, height: "100%", background: "var(--primary)", borderRadius: 4, transition: "width 0.5s" }} />
+      {/* Main Content Area */}
+      <div className="flex-1 flex flex-col min-w-0">
+        
+        {/* Top Header */}
+        <header className="bg-white border-b border-gray-200 h-16 flex items-center justify-between px-6 sticky top-0 z-10">
+          <div className="flex items-center gap-4 flex-1">
+            <div className="relative w-full max-w-md hidden sm:block">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+              <input 
+                type="text" 
+                placeholder="Search metrics, vehicles, logs..." 
+                className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-[#c41e1e]"
+              />
+            </div>
+          </div>
+          <div className="flex items-center gap-4">
+            <button className="relative p-2 text-gray-500 hover:bg-gray-100 rounded-full transition-colors">
+              <Bell size={20} />
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
+            </button>
+            <div className="h-8 w-px bg-gray-200"></div>
+            <AuthHeaderNav />
+          </div>
+        </header>
+
+        {/* Dashboard Content */}
+        <main className="flex-1 p-6 md:p-8 overflow-y-auto">
+          
+          <div className="mb-8">
+            <h1 className="text-2xl font-bold font-outfit text-gray-900">Platform Overview</h1>
+            <p className="text-gray-500 text-sm mt-1">Real-time statistics connected to Convex</p>
+          </div>
+
+          {/* Real-time Stats */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
+            <div className="bg-white rounded-xl p-5 shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] border border-gray-100">
+              <div className="flex justify-between items-start">
+                <div>
+                  <p className="text-sm text-gray-500 font-medium">Total Listings</p>
+                  <h3 className="text-3xl font-bold font-outfit text-gray-900 mt-1">{stats ? stats.totalListings : "..."}</h3>
                 </div>
-                <span style={{ fontSize: "0.85rem", color: "var(--text-mid)", width: 60, textAlign: "right" }}>{m.count} ({m.pct}%)</span>
+                <div className="p-2 bg-red-50 text-[#c41e1e] rounded-lg"><Database size={20} /></div>
               </div>
-            ))}
-          </div>
-
-          <div style={{ background: "var(--bg-white)", border: "1px solid var(--border-light)", borderRadius: "var(--radius)", padding: 24 }}>
-            <h3 style={{ fontWeight: 700, marginBottom: 16 }}>Business Categories</h3>
-            {CAT_DIST.map(c => (
-              <div key={c.cat} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 0", borderBottom: "1px solid #f3f4f6" }}>
-                <span style={{ fontSize: "0.9rem" }}>{c.icon} {c.cat}</span>
-                <span className="badge badge-blue">{c.count}</span>
+            </div>
+            
+            <div className="bg-white rounded-xl p-5 shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] border border-gray-100">
+               <div className="flex justify-between items-start">
+                <div>
+                  <p className="text-sm text-gray-500 font-medium">Business Directory</p>
+                  <h3 className="text-3xl font-bold font-outfit text-gray-900 mt-1">{stats ? stats.totalBusinesses : "..."}</h3>
+                </div>
+                <div className="p-2 bg-blue-50 text-blue-600 rounded-lg"><MapPin size={20} /></div>
               </div>
-            ))}
-          </div>
-        </div>
+            </div>
 
-        {/* Agent Pipeline */}
-        <div style={{ marginTop: 32, background: "var(--bg-white)", border: "1px solid var(--border-light)", borderRadius: "var(--radius)", overflow: "hidden" }}>
-          <div style={{ padding: "16px 24px", borderBottom: "1px solid var(--border-light)" }}>
-            <h3 style={{ fontWeight: 700 }}>AI Agent Pipeline Status</h3>
-          </div>
-          <table className="data-table">
-            <thead><tr>
-              <th>Agent</th><th>Status</th><th>Records</th><th>Duration</th><th>Last Run</th>
-            </tr></thead>
-            <tbody>
-              {AGENTS.map(a => (
-                <tr key={a.name}>
-                  <td style={{ fontWeight: 600 }}>{a.name}</td>
-                  <td><span className={`badge ${a.status === "completed" ? "badge-green" : a.status === "running" ? "badge-blue" : "badge-amber"}`}>{a.status}</span></td>
-                  <td style={{ color: "var(--primary)", fontWeight: 600 }}>{a.records}</td>
-                  <td>{a.duration}</td>
-                  <td style={{ color: "var(--text-light)" }}>{a.last}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </section>
+            <div className="bg-white rounded-xl p-5 shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] border border-gray-100">
+               <div className="flex justify-between items-start">
+                <div>
+                  <p className="text-sm text-gray-500 font-medium">Fraud Flags</p>
+                  <h3 className="text-3xl font-bold font-outfit text-gray-900 mt-1">{stats ? stats.totalFraudFlags : "..."}</h3>
+                </div>
+                <div className="p-2 bg-yellow-50 text-yellow-600 rounded-lg"><Activity size={20} /></div>
+              </div>
+            </div>
 
-      <footer className="footer"><p><strong>SAIP</strong> — Somaliland Automotive Intelligence Platform • Built by <strong>M2 Creative & Consulting</strong></p></footer>
+            <div className="bg-white rounded-xl p-5 shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] border border-gray-100">
+               <div className="flex justify-between items-start">
+                <div>
+                  <p className="text-sm text-gray-500 font-medium">Indexed Keywords</p>
+                  <h3 className="text-3xl font-bold font-outfit text-gray-900 mt-1">{stats ? stats.totalKeywords : "..."}</h3>
+                </div>
+                <div className="p-2 bg-green-50 text-green-600 rounded-lg"><Search size={20} /></div>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            
+            {/* AI pipeline logs Table */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+              <div className="p-5 border-b border-gray-200 bg-gray-50 flex justify-between items-center">
+                <h2 className="font-bold text-gray-900">Agent Pipeline Status</h2>
+                <button className="text-sm text-[#c41e1e] font-medium hover:underline">View All</button>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse text-sm">
+                  <thead>
+                    <tr className="border-b border-gray-200 bg-white text-gray-500">
+                      <th className="p-4 font-medium">Pipeline</th>
+                      <th className="p-4 font-medium">Status</th>
+                      <th className="p-4 font-medium">Records</th>
+                      <th className="p-4 font-medium">Time (UTC)</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {stats && stats.recentAgentRuns?.length > 0 ? (
+                      stats.recentAgentRuns.map((agent, i) => (
+                        <tr key={agent._id} className="hover:bg-gray-50">
+                          <td className="p-4 font-medium text-gray-900">{agent.agentName}</td>
+                          <td className="p-4">
+                            <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${
+                              agent.status === 'completed' ? 'bg-green-100 text-green-800' :
+                              agent.status === 'running' ? 'bg-blue-100 text-blue-800' : 'bg-red-100 text-red-800'
+                            }`}>
+                              {agent.status.toUpperCase()}
+                            </span>
+                          </td>
+                          <td className="p-4 text-gray-600">{agent.recordsInserted || agent.recordsFound || 0}</td>
+                          <td className="p-4 text-gray-500 whitespace-nowrap">
+                            {new Date(agent.startedAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr><td colSpan={4} className="p-8 text-center text-gray-500">No active pipelines running.</td></tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* AI Studio (Nano Banana) */}
+            <div className="bg-white rounded-xl shadow-[0_4px_20px_-5px_rgba(0,0,0,0.1)] border border-gray-200 overflow-hidden flex flex-col relative">
+              <div className="absolute top-0 w-full h-1 bg-gradient-to-r from-yellow-400 via-orange-500 to-[#c41e1e]"></div>
+              <div className="p-6 border-b border-gray-100 flex items-center gap-3">
+                <div className="bg-orange-100 p-2 rounded-lg"><Sparkles size={20} className="text-orange-600" /></div>
+                <div>
+                  <h2 className="text-lg font-bold font-outfit text-gray-900">AI Studio: Nano Banana Pro</h2>
+                  <p className="text-xs text-gray-500 mt-0.5">Generate high-quality concept art & hero assets directly to CDN</p>
+                </div>
+              </div>
+              
+              <div className="p-6 flex-1 flex flex-col bg-gray-50">
+                <div className="flex gap-2 mb-4">
+                  <input 
+                    type="text" 
+                    value={prompt}
+                    onChange={e => setPrompt(e.target.value)}
+                    placeholder="e.g., 'Modern Somali auto repair garage front'" 
+                    className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-[#c41e1e] shadow-sm text-sm"
+                  />
+                  <button 
+                    onClick={generateImage}
+                    disabled={generating || !prompt}
+                    className="bg-gray-900 hover:bg-[#c41e1e] text-white px-5 py-2.5 rounded-lg font-medium transition-all shadow-md flex items-center justify-center min-w-[130px]"
+                  >
+                    {generating ? <Loader2 size={18} className="animate-spin" /> : <><Wand2 size={16} className="mr-2" /> Generate</>}
+                  </button>
+                </div>
+
+                <div className="flex-1 border-2 border-dashed border-gray-300 rounded-xl bg-white flex items-center justify-center p-2 relative overflow-hidden min-h-[300px] shadow-inner">
+                  {generatedImg ? (
+                    <img src={generatedImg} alt="Generated Asset" className="w-full h-full object-cover rounded-lg shadow-sm" />
+                  ) : (
+                    <div className="text-center text-gray-400">
+                      <ImageIcon size={48} className="mx-auto mb-3 text-gray-300" />
+                      <p className="text-sm font-medium">Generated asset will appear here</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </main>
+      </div>
     </div>
   );
 }

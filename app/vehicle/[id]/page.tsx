@@ -1,118 +1,150 @@
 "use client";
 import Link from "next/link";
+import AuthHeaderNav from "@/components/AuthHeaderNav";
+import { useState } from "react";
+import { ShieldAlert, Info, Settings, Clock, ShieldCheck, MapPin, Gauge, Video, Sparkles, Search } from "lucide-react";
 
-const VEHICLE = {
-  make: "Toyota", model: "Vitz", year: 2012, color: "White", plate: "SL-49201-M",
-  engine: "1NZ-FE 1.5L", transmission: "CVT", fuel: "Gasoline", vin: "JTM1R2EV3GD123456",
-  status: "active", mileage: 98000, city: "Hargeisa", price: 4800, fraudScore: "LOW",
-  img: "https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=800&h=500&fit=crop",
-  seller: "Hassan Cars", phone: "+252634334455", source: "facebook",
-};
+export default function VehicleProfilePage({ params }: { params: { id: string } }) {
+  const [animating, setAnimating] = useState(false);
+  const [videoUrl, setVideoUrl] = useState<string | null>(null);
 
-const SERVICE = [
-  { date: "2025-12-01", type: "Oil Change", shop: "MASS Car Workshop", cost: 35 },
-  { date: "2025-09-15", type: "Tire Rotation", shop: "Burco Tyre Center", cost: 25 },
-  { date: "2025-06-20", type: "Brake Inspection", shop: "MASS Car Workshop", cost: 55 },
-  { date: "2025-03-01", type: "Full Service", shop: "Hargeisa Body Works", cost: 120 },
-];
+  const vehicleImg = "https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?auto=format&fit=crop&q=80&w=1200";
 
-export default function VehicleProfilePage() {
+  const animateImage = async () => {
+    setAnimating(true);
+    try {
+      const res = await fetch("/api/veo", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ imageUrl: vehicleImg, prompt: "Dynamic showroom pan and zoom effect" })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setVideoUrl(data.videoUrl);
+      }
+    } finally {
+      setAnimating(false);
+    }
+  };
+
   return (
-    <div>
-      <nav className="navbar"><div className="navbar-inner">
-        <Link href="/" className="nav-logo">🚗 SAIP <span>.sl</span></Link>
-        <ul className="nav-links">
-          <li><Link href="/">Home</Link></li>
-          <li><Link href="/marketplace">Marketplace</Link></li>
-          <li><Link href="/directory">Directory</Link></li>
-          <li><Link href="/admin">Dashboard</Link></li>
-        </ul>
-      </div></nav>
+    <div className="min-h-screen bg-[#f5f6fa]">
+      <nav className="navbar">
+        <div className="navbar-inner">
+          <Link href="/" className="nav-logo">🚗 SAIP <span>.sl</span></Link>
+          <ul className="nav-links">
+            <li><Link href="/">Home</Link></li>
+            <li><Link href="/marketplace">Marketplace</Link></li>
+            <li><Link href="/directory">Directory</Link></li>
+            <li><Link href="/admin">Dashboard</Link></li>
+            <li><AuthHeaderNav /></li>
+          </ul>
+        </div>
+      </nav>
 
-      <section className="section">
-        {/* Vehicle Hero */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24, marginBottom: 32 }}>
-          <div style={{ borderRadius: "var(--radius)", overflow: "hidden", border: "1px solid var(--border-light)" }}>
-            <img src={VEHICLE.img} alt={`${VEHICLE.make} ${VEHICLE.model}`} style={{ width: "100%", height: "100%", objectFit: "cover", minHeight: 350 }} />
+      <main className="max-w-7xl mx-auto px-4 py-8">
+        
+        {/* Veo 3 Action Bar */}
+        <div className="w-full bg-gradient-to-r from-gray-900 to-[#c41e1e] p-4 rounded-xl shadow-md text-white flex justify-between items-center mb-6">
+          <div className="flex items-center gap-2">
+            <Sparkles className="text-yellow-400" />
+            <h3 className="font-bold font-outfit">Veo 3 AI Studio</h3>
+            <span className="hidden sm:inline text-sm opacity-90">— Transform standard photos into cinematic video ads instantly.</span>
           </div>
-          <div>
-            <h1 style={{ fontFamily: "'Outfit', sans-serif", fontSize: "2.2rem", fontWeight: 900, marginBottom: 8 }}>{VEHICLE.make} {VEHICLE.model}</h1>
-            <p style={{ color: "var(--text-mid)", marginBottom: 20 }}>{VEHICLE.year} • {VEHICLE.plate} • {VEHICLE.city}</p>
+          <button 
+            onClick={animateImage}
+            disabled={animating}
+            className="bg-white text-gray-900 hover:bg-gray-100 font-bold px-4 py-2 rounded-lg flex items-center transition-colors"
+          >
+            {animating ? "Generating Video..." : <><Video size={18} className="mr-2" /> Animate Ad</>}
+          </button>
+        </div>
 
-            <div className="stats-row" style={{ gridTemplateColumns: "1fr 1fr 1fr" }}>
-              <div className="stat-box">
-                <div className="stat-label">Market Value</div>
-                <div className="stat-value" style={{ color: "var(--primary)", fontSize: "1.8rem" }}>${VEHICLE.price.toLocaleString()}</div>
-                <div className="stat-change">Based on Hargeisa data</div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Main Gallery & AI Video Player */}
+          <div className="lg:col-span-2 space-y-6">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden relative">
+              {videoUrl ? (
+                <video src={videoUrl} controls autoPlay loop className="w-full h-[500px] object-cover" />
+              ) : (
+                <img 
+                  src={vehicleImg}
+                  alt="Toyota Land Cruiser"
+                  className="w-full h-[500px] object-cover"
+                />
+              )}
+              {videoUrl && <div className="absolute top-4 left-4 bg-red-600 text-white font-bold text-xs uppercase px-2 py-1 rounded">VEO 3 RENDER</div>}
+            </div>
+
+            {/* AI Agent Fact Check Insight */}
+            <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+              <h3 className="font-bold text-blue-900 flex items-center gap-2 mb-2"><Search size={18} /> Google Search Agent Fact-Check</h3>
+              <p className="text-sm text-blue-800">
+                Data matched against regional import records. Value aligns with 2018 Toyota Land Cruiser VX average prices in Somaliland ($45,000 - $52,000). The seller is highly verified via institutional links.
+              </p>
+            </div>
+
+            {/* Existing Specs table... (keeping structure simple for MVP) */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+              <div className="p-6 border-b border-gray-100">
+                <h3 className="text-xl font-bold font-outfit text-gray-900 flex items-center gap-2">
+                  <Info size={20} className="text-[#c41e1e]" /> Vehicle Specifications
+                </h3>
               </div>
-              <div className="stat-box green">
-                <div className="stat-label">Fraud Risk</div>
-                <div className="stat-value" style={{ color: "#16a34a", fontSize: "1.8rem" }}>{VEHICLE.fraudScore}</div>
-                <div className="stat-change">VIN + mileage verified</div>
+              <div className="grid grid-cols-2 md:grid-cols-3 p-6 gap-y-6 gap-x-4">
+                <div><p className="text-sm text-gray-500 mb-1">Make</p><p className="font-medium text-gray-900">Toyota</p></div>
+                <div><p className="text-sm text-gray-500 mb-1">Model</p><p className="font-medium text-gray-900">Land Cruiser</p></div>
+                <div><p className="text-sm text-gray-500 mb-1">Year</p><p className="font-medium text-gray-900">2018</p></div>
+                <div><p className="text-sm text-gray-500 mb-1">Color</p><p className="font-medium text-gray-900">White</p></div>
+                <div><p className="text-sm text-gray-500 mb-1">Transmission</p><p className="font-medium text-gray-900">Automatic</p></div>
+                <div><p className="text-sm text-gray-500 mb-1">Fuel Type</p><p className="font-medium text-gray-900">Diesel</p></div>
               </div>
-              <div className="stat-box blue">
-                <div className="stat-label">Odometer</div>
-                <div className="stat-value" style={{ fontSize: "1.8rem" }}>{VEHICLE.mileage.toLocaleString()}</div>
-                <div className="stat-change">kilometers</div>
+            </div>
+          </div>
+
+          <div className="space-y-6">
+            <div className="bg-white rounded-xl shadow-sm border-t-4 border-[#c41e1e] p-6 lg:p-8">
+              <h1 className="text-3xl font-bold font-outfit text-gray-900 mb-2">2018 Toyota Land Cruiser</h1>
+              <p className="text-gray-500 flex items-center gap-2 mb-6 font-medium">
+                <MapPin size={18} className="text-gray-400" /> Hargeisa, Jigjiga Yar
+              </p>
+              
+              <div className="border-b border-gray-100 pb-6 mb-6">
+                <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Asking Price</p>
+                <p className="text-4xl font-bold text-[#c41e1e] font-outfit tracking-tight">$48,000</p>
+                <p className="text-sm text-gray-500 mt-2">Negotiable</p>
+              </div>
+
+              <div className="space-y-4">
+                <button className="w-full bg-[#c41e1e] hover:bg-[#a01818] text-white font-bold py-4 rounded-xl transition-colors text-lg shadow-lg hover:-translate-y-1">
+                  Contact Seller
+                </button>
+                <div className="flex gap-2">
+                  <button className="flex-1 bg-white border-2 border-green-600 text-green-700 hover:bg-green-50 font-bold py-3 rounded-xl transition-colors">
+                    WhatsApp
+                  </button>
+                  <button className="w-14 bg-white border border-gray-200 hover:bg-gray-50 flex items-center justify-center rounded-xl transition-colors">
+                    ♥️
+                  </button>
+                </div>
               </div>
             </div>
 
-            <div style={{ display: "flex", gap: 12, marginTop: 24 }}>
-              <a href={`tel:${VEHICLE.phone}`} className="btn-details" style={{ flex: 1, justifyContent: "center" }}>📞 Call Seller</a>
-              <button className="btn-outline" style={{ flex: 1 }}>💬 WhatsApp</button>
+            <div className="bg-white rounded-xl shadow-sm border border-green-100 p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-3 bg-green-100 rounded-lg text-green-700">
+                  <ShieldCheck size={24} />
+                </div>
+                <div>
+                  <h3 className="font-bold font-outfit text-gray-900 text-lg">Verified Seller</h3>
+                  <p className="text-sm text-gray-500">Identity & documents verified</p>
+                </div>
+              </div>
             </div>
+
           </div>
         </div>
-
-        {/* Specifications */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
-          <div style={{ background: "var(--bg-white)", border: "1px solid var(--border-light)", borderRadius: "var(--radius)", padding: 24 }}>
-            <h3 style={{ fontWeight: 700, marginBottom: 16 }}>Vehicle Specifications</h3>
-            <table style={{ width: "100%" }}>
-              <tbody>
-                {[
-                  ["Make", VEHICLE.make], ["Model", VEHICLE.model], ["Year", VEHICLE.year],
-                  ["Color", VEHICLE.color], ["Engine", VEHICLE.engine], ["Transmission", VEHICLE.transmission],
-                  ["Fuel", VEHICLE.fuel], ["VIN", VEHICLE.vin], ["Plate", VEHICLE.plate], ["Status", VEHICLE.status],
-                ].map(([k, v], i) => (
-                  <tr key={i} style={{ borderBottom: "1px solid #f3f4f6" }}>
-                    <td style={{ padding: "10px 0", fontWeight: 500, color: "var(--text-light)", width: "40%" }}>{k}</td>
-                    <td style={{ padding: "10px 0", fontWeight: 600 }}>{String(v)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          <div style={{ background: "var(--bg-white)", border: "1px solid var(--border-light)", borderRadius: "var(--radius)", padding: 24 }}>
-            <h3 style={{ fontWeight: 700, marginBottom: 16 }}>Service History</h3>
-            <table className="data-table">
-              <thead><tr><th>Date</th><th>Service</th><th>Shop</th><th>Cost</th></tr></thead>
-              <tbody>
-                {SERVICE.map((s, i) => (
-                  <tr key={i}>
-                    <td>{s.date}</td>
-                    <td style={{ fontWeight: 600 }}>{s.type}</td>
-                    <td>{s.shop}</td>
-                    <td style={{ color: "var(--primary)", fontWeight: 600 }}>${s.cost}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        {/* Seller Info */}
-        <div style={{ marginTop: 24, background: "var(--bg-white)", border: "1px solid var(--border-light)", borderRadius: "var(--radius)", padding: 24, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <div>
-            <h3 style={{ fontWeight: 700, marginBottom: 4 }}>Listed by: {VEHICLE.seller}</h3>
-            <p style={{ color: "var(--text-mid)", fontSize: "0.9rem" }}>{VEHICLE.phone} • Found on {VEHICLE.source}</p>
-          </div>
-          <Link href="/marketplace" className="btn-outline">← Back to Marketplace</Link>
-        </div>
-      </section>
-
-      <footer className="footer"><p><strong>SAIP</strong> — Somaliland Automotive Intelligence Platform • Built by <strong>M2 Creative & Consulting</strong></p></footer>
+      </main>
     </div>
   );
 }

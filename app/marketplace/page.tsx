@@ -1,88 +1,143 @@
 "use client";
 import Link from "next/link";
 import { useState } from "react";
+import AuthHeaderNav from "@/components/AuthHeaderNav";
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import { MapPin, Calendar, Gauge, CheckCircle } from "lucide-react";
 
 const MAKES = ["All", "Toyota", "Honda", "Nissan", "Suzuki", "Mitsubishi"];
 const PRICES = ["All Prices", "$0-$5K", "$5K-$15K", "$15K-$30K", "$30K+"];
 
-function priceRange(p: string): [number, number] {
-  switch(p) { case "$0-$5K": return [0,5000]; case "$5K-$15K": return [5000,15000]; case "$15K-$30K": return [15000,30000]; case "$30K+": return [30000,999999]; default: return [0,999999]; }
-}
-
-const LISTINGS = [
-  { make: "Toyota", model: "Land Cruiser 79", year: 2019, price: 35000, city: "Hargeisa", km: 35000, fuel: "Diesel", trans: "Manual", source: "facebook", seller: "Ahmed Motors", phone: "+252634112233", img: "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?w=400&h=250&fit=crop" },
-  { make: "Toyota", model: "Hilux D4D", year: 2020, price: 22000, city: "Hargeisa", km: 28000, fuel: "Diesel", trans: "Auto", source: "instagram", seller: "Ali Auto", phone: "+252634223344", img: "https://images.unsplash.com/photo-1559416523-140ddc3d238c?w=400&h=250&fit=crop" },
-  { make: "Toyota", model: "Vitz 1.5", year: 2015, price: 5500, city: "Berbera", km: 82000, fuel: "Petrol", trans: "CVT", source: "facebook", seller: "Hassan Cars", phone: "+252634334455", img: "https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=400&h=250&fit=crop" },
-  { make: "Honda", model: "Vezel", year: 2018, price: 13000, city: "Hargeisa", km: 42000, fuel: "Petrol", trans: "Auto", source: "tiktok", seller: "Star Motors", phone: "+252634445566", img: "https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=400&h=250&fit=crop" },
-  { make: "Nissan", model: "Patrol Y61", year: 2017, price: 28000, city: "Burco", km: 52000, fuel: "Diesel", trans: "Auto", source: "facebook", seller: "Burco Auto", phone: "+252634556677", img: "https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=400&h=250&fit=crop" },
-  { make: "Toyota", model: "Probox", year: 2014, price: 4800, city: "Hargeisa", km: 98000, fuel: "Petrol", trans: "Auto", source: "google", seller: "Direct Sale", phone: "+252634667788", img: "https://images.unsplash.com/photo-1580273916550-e323be2ae537?w=400&h=250&fit=crop" },
-  { make: "Toyota", model: "Prado TX", year: 2016, price: 25000, city: "Hargeisa", km: 68000, fuel: "Diesel", trans: "Auto", source: "facebook", seller: "Dahabshiil Motors", phone: "+252634778899", img: "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=400&h=300&fit=crop" },
-  { make: "Suzuki", model: "Jimny", year: 2019, price: 12000, city: "Borama", km: 32000, fuel: "Petrol", trans: "Manual", source: "instagram", seller: "Borama Cars", phone: "+252634889900", img: "https://images.unsplash.com/photo-1542362567-b07e54358753?w=400&h=300&fit=crop" },
-];
-
 export default function MarketplacePage() {
-  const [make, setMake] = useState("All");
-  const [price, setPrice] = useState("All Prices");
-  const [min, max] = priceRange(price);
+  const [activeMake, setActiveMake] = useState("All");
+  const [activePrice, setActivePrice] = useState("All Prices");
+  const [layout, setLayout] = useState<"grid" | "list">("list");
 
-  const filtered = LISTINGS.filter(l => {
-    if (make !== "All" && l.make !== make) return false;
-    if (l.price < min || l.price > max) return false;
-    return true;
-  });
+  // Fetch Live Convex Data
+  const listings = useQuery(api.functions.getListings, { limit: 50 });
+  
+  // Client-side filtering
+  const filteredListings = listings?.filter((l: any) => 
+    activeMake === "All" || (l.normalizedMake || "").toLowerCase() === activeMake.toLowerCase()
+  );
 
   return (
-    <div>
-      <nav className="navbar"><div className="navbar-inner">
-        <Link href="/" className="nav-logo">🚗 SAIP <span>.sl</span></Link>
-        <ul className="nav-links">
-          <li><Link href="/">Home</Link></li>
-          <li><Link href="/marketplace" className="active">All Ads</Link></li>
-          <li><Link href="/directory">Directory</Link></li>
-          <li><Link href="/admin">Dashboard</Link></li>
-          <li><Link href="/marketplace" className="nav-cta">Post Free Ad</Link></li>
-        </ul>
-      </div></nav>
-
-      <section className="section">
-        <h1 className="section-title" style={{ fontSize: "2rem" }}>Vehicle <em>Marketplace</em></h1>
-        <p style={{ color: "var(--text-mid)", marginBottom: 24 }}>Listings aggregated from Facebook, TikTok, Instagram & Google</p>
-
-        <div className="filter-bar">
-          {MAKES.map(m => (<button key={m} className={`filter-btn ${make === m ? "active" : ""}`} onClick={() => setMake(m)}>{m}</button>))}
+    <div className="min-h-screen bg-[#f5f6fa]">
+      {/* Navbar */}
+      <nav className="navbar">
+        <div className="navbar-inner">
+          <Link href="/" className="nav-logo">🚗 SAIP <span>.sl</span></Link>
+          <ul className="nav-links">
+            <li><Link href="/">Home</Link></li>
+            <li><Link href="/marketplace" className="active">All Ads</Link></li>
+            <li><Link href="/directory">Directory</Link></li>
+            <li><Link href="/admin">Dashboard</Link></li>
+            <li><AuthHeaderNav /></li>
+          </ul>
         </div>
-        <div className="filter-bar" style={{ marginBottom: 24 }}>
-          {PRICES.map(p => (<button key={p} className={`filter-btn ${price === p ? "active" : ""}`} onClick={() => setPrice(p)}>{p}</button>))}
+      </nav>
+
+      <main className="max-w-7xl mx-auto px-4 py-8">
+        
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+          <div>
+            <h1 className="text-3xl font-bold font-outfit text-gray-900">Vehicle Marketplace</h1>
+            <p className="text-gray-500 mt-1">Somaliland's largest auto inventory</p>
+          </div>
         </div>
 
-        <p style={{ color: "var(--text-light)", fontSize: "0.85rem", marginBottom: 16 }}>{filtered.length} listings found</p>
+        {/* Filters */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-8 flex flex-col sm:flex-row gap-4">
+          <div className="flex-1 flex gap-2 overflow-x-auto pb-2 sm:pb-0 scrollbar-hide">
+            {MAKES.map(make => (
+              <button
+                key={make}
+                onClick={() => setActiveMake(make)}
+                className={`px-6 py-2 whitespace-nowrap rounded-full font-medium transition-colors border ${
+                  activeMake === make 
+                    ? "bg-[#c41e1e] text-white border-[#c41e1e]" 
+                    : "bg-white text-gray-600 border-gray-200 hover:border-gray-300 hover:bg-gray-50"
+                }`}
+              >
+                {make}
+              </button>
+            ))}
+          </div>
+          <div className="flex gap-2 overflow-x-auto pb-2 sm:pb-0 scrollbar-hide">
+             {PRICES.map(price => (
+              <button
+                key={price}
+                onClick={() => setActivePrice(price)}
+                className={`px-4 py-2 whitespace-nowrap rounded-full font-medium transition-colors border text-sm ${
+                  activePrice === price 
+                    ? "bg-gray-900 text-white border-gray-900" 
+                    : "bg-white text-gray-600 border-gray-200 hover:border-gray-300"
+                }`}
+              >
+                {price}
+              </button>
+            ))}
+          </div>
+        </div>
 
-        <div className="listings-grid">
-          {filtered.map((l, i) => (
-            <div key={i} className="listing-h">
-              <img src={l.img} alt={`${l.make} ${l.model}`} className="listing-h-img" />
-              <div className="listing-h-body">
-                <div className="listing-h-title">{l.make} {l.model} — {l.year}</div>
-                <div className="listing-h-meta">
-                  <span><span className="icon">⛽</span> {l.fuel}</span>
-                  <span><span className="icon">📏</span> {l.km.toLocaleString()} km</span>
-                  <span><span className="icon">⚙️</span> {l.trans}</span>
-                  <span><span className="icon">📍</span> {l.city}</span>
+        {/* Listing Cards */}
+        <div className="flex flex-col gap-4">
+          {filteredListings === undefined ? (
+            <p className="text-center py-10 text-gray-500">Loading live marketplace...</p>
+          ) : filteredListings.length === 0 ? (
+            <p className="text-center py-10 text-gray-500">No vehicles found. Try adjusting filters.</p>
+          ) : (
+            filteredListings.map((v: any) => (
+              <div key={v._id} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden flex flex-col md:flex-row hover:shadow-md transition-shadow">
+                
+                {/* Image Section */}
+                <div className="w-full md:w-[300px] h-48 md:h-auto relative bg-gray-100">
+                  <img src={v.images?.[0] || "https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=600"} alt={`${v.normalizedMake} ${v.normalizedModel}`} className="w-full h-full object-cover" />
+                  <div className="absolute top-2 right-2 bg-yellow-400 text-yellow-900 text-xs font-bold px-2 py-1 rounded">TOP AD</div>
                 </div>
-                <div className="listing-h-source">{l.source}</div>
-                <div style={{ fontSize: "0.85rem", color: "var(--text-mid)" }}>Seller: {l.seller}</div>
-              </div>
-              <div className="listing-h-right">
-                <div className="listing-h-price">${l.price.toLocaleString()}</div>
-                <Link href={`/vehicle/SL-${49201 + i}-M`} className="btn-details">See Details</Link>
-                <a href={`tel:${l.phone}`} className="btn-outline" style={{ fontSize: "0.8rem", padding: "8px 16px" }}>📞 Call Seller</a>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
 
-      <footer className="footer"><p><strong>SAIP</strong> — Somaliland Automotive Intelligence Platform • Built by <strong>M2 Creative & Consulting</strong></p></footer>
+                {/* Details Section */}
+                <div className="p-4 md:p-6 flex-1 flex flex-col justify-between">
+                  <div>
+                    <div className="flex justify-between items-start mb-2">
+                      <Link href={`/vehicle/${v._id}`}>
+                        <h3 className="text-xl font-bold font-outfit text-gray-900 hover:text-[#c41e1e] transition-colors">
+                          {v.year} {v.normalizedMake} {v.normalizedModel}
+                        </h3>
+                      </Link>
+                      <button className="text-gray-400 hover:text-[#c41e1e]">♥️</button>
+                    </div>
+                    
+                    <div className="flex flex-wrap gap-4 text-sm text-gray-600 mb-4 font-medium">
+                      <span className="flex items-center gap-1"><MapPin size={16} className="text-gray-400"/> {v.city || v.location || "Hargeisa"}</span>
+                      <span className="flex items-center gap-1"><Calendar size={16} className="text-gray-400"/> {v.year || "N/A"}</span>
+                      <span className="flex items-center gap-1"><Gauge size={16} className="text-gray-400"/> {"N/A"}</span>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col md:flex-row justify-between items-center mt-4 pt-4 border-t border-gray-100 gap-4">
+                    <div className="text-[#c41e1e] font-bold text-2xl font-outfit tracking-tight">
+                      ${v.priceUsd ? v.priceUsd.toLocaleString() : "Contact"} 
+                      <span className="text-sm font-normal text-gray-500 ml-2 block sm:inline">Negotiable</span>
+                    </div>
+                    
+                    <div className="flex gap-2 w-full md:w-auto">
+                      <button className="flex-1 md:flex-none border border-[#c41e1e] text-[#c41e1e] hover:bg-red-50 font-bold px-6 py-2 rounded-lg transition-colors">
+                        Call Seller
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      </main>
+
+      <footer className="footer bg-gray-900 text-white py-12 text-center">
+        <p><strong>SAIP</strong> — Somaliland Automotive Intelligence Platform • Built by <strong>M2 Creative & Consulting</strong></p>
+      </footer>
     </div>
   );
 }

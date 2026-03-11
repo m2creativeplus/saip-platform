@@ -38,9 +38,17 @@ export const insertListing = mutation({
 export const getListings = query({
   args: { city: v.optional(v.string()), source: v.optional(v.string()), limit: v.optional(v.number()) },
   handler: async (ctx, args) => {
-    let q = ctx.db.query("vehicleListings").filter(q => q.eq(q.field("isActive"), true));
-    if (args.city) q = ctx.db.query("vehicleListings").withIndex("by_city", q => q.eq("city", args.city!));
-    return q.order("desc").take(args.limit || 50);
+    if (args.city) {
+      return ctx.db.query("vehicleListings")
+        .withIndex("by_city", q => q.eq("city", args.city!))
+        .filter(q => q.eq(q.field("isActive"), true))
+        .order("desc")
+        .take(args.limit || 50);
+    }
+    return ctx.db.query("vehicleListings")
+      .filter(q => q.eq(q.field("isActive"), true))
+      .order("desc")
+      .take(args.limit || 50);
   },
 });
 
@@ -238,9 +246,9 @@ export const searchVehicles = query({
     const q = args.query.toLowerCase();
     const all = await ctx.db.query("vehicleListings").take(500);
     return all.filter(l =>
-      (l.normalizedMake?.toLowerCase().includes(q)) ||
-      (l.normalizedModel?.toLowerCase().includes(q)) ||
-      (l.rawText?.toLowerCase().includes(q))
+      (l.normalizedMake?.toLowerCase().includes(q) || false) ||
+      (l.normalizedModel?.toLowerCase().includes(q) || false) ||
+      (l.rawText?.toLowerCase().includes(q) || false)
     ).slice(0, 50);
   },
 });
@@ -251,9 +259,9 @@ export const searchBusinesses = query({
     const q = args.query.toLowerCase();
     const all = await ctx.db.query("automotiveBusinesses").take(500);
     return all.filter(b =>
-      b.name.toLowerCase().includes(q) ||
-      b.category.includes(q) ||
-      b.city.toLowerCase().includes(q)
+      (b.name?.toLowerCase().includes(q) || false) ||
+      (b.category?.toLowerCase().includes(q) || false) ||
+      (b.city?.toLowerCase().includes(q) || false)
     ).slice(0, 50);
   },
 });

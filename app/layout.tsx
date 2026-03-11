@@ -1,19 +1,33 @@
 import type { Metadata } from "next";
+import { Inter, Outfit } from "next/font/google";
 import "./globals.css";
+import { AuthProvider } from "@/components/AuthProvider";
+import ConvexClientProvider from "@/components/ConvexClientProvider";
+import AiChatbot from "@/components/AiChatbot";
+
+const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
+const outfit = Outfit({ subsets: ["latin"], weight: ["400", "700", "900"], variable: "--font-outfit" });
 
 export const metadata: Metadata = {
-  title: "SAIP — Somaliland Automotive Intelligence Platform",
-  description: "Discover vehicles, dealers, spare parts, garages, and automotive services across the Republic of Somaliland. The largest automotive directory and marketplace.",
-  keywords: ["Somaliland", "automotive", "car dealer", "Hargeisa", "vehicle", "spare parts", "garage", "SAIP", "gaadhi iib ah"],
+  title: "SAIP | Somaliland Automotive Intelligence Platform",
+  description: "Next-generation automotive marketplace & directory",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
   return (
-    <html lang="en">
-      <head>
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
-      </head>
-      <body>{children}</body>
+    <html lang="en" className="dark">
+      <body className={`${inter.variable} ${outfit.variable} antialiased bg-[#0A0A0A] text-zinc-100 selection:bg-[#D4AF37] selection:text-black`}>
+        <ConvexClientProvider>
+          <AuthProvider>
+            {children}
+            <AiChatbot />
+          </AuthProvider>
+        </ConvexClientProvider>
+      </body>
     </html>
   );
 }
