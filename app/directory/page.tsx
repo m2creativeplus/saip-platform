@@ -4,7 +4,7 @@ import Link from "next/link";
 import AuthHeaderNav from "@/components/AuthHeaderNav";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import { Phone, MapPin, Search, Star, MessageSquare, Map as MapIcon, Layers, Navigation, ShieldCheck, Settings, Store } from "lucide-react";
+import { Phone, MapPin, Search, Star, MessageSquare, Map as MapIcon, Layers, Navigation, ShieldCheck, Settings, Store as StoreIconLucide } from "lucide-react";
 
 const CATEGORIES = ["all", "car_dealer", "garage", "spare_parts", "tire_shop", "fuel_station", "car_wash"];
 
@@ -315,6 +315,6 @@ function StoreIcon({ category }: { category: string }) {
   if (category === 'car_dealer') return <ShieldCheck size={20} />;
   if (category === 'garage') return <Settings size={20} />;
   if (category === 'fuel_station') return <Navigation size={20} />;
-  return <Store size={20} />;
+  return <StoreIconLucide size={20} />;
 }
 
