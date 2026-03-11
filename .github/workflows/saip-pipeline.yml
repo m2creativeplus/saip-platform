@@ -1,0 +1,144 @@
+name: SAIP CI/CD & Scraping Pipelines
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: '0 23 * * *'     # Daily at 02:00 EAT (UTC 23:00) — Google agents
+    - cron: '0 */6 * * *'    # Every 6 hours — Facebook agent
+    - cron: '0 */12 * * *'   # Every 12 hours — Social media agents
+    - cron: '0 0 * * 0'      # Weekly Sunday — Valuation + Fraud agents
+  workflow_dispatch:
+    inputs:
+      agent:
+        description: 'Agent to run'
+        required: true
+        type: choice
+        options:
+          - all
+          - google-search
+          - google-maps
+          - facebook
+          - nlp-normalizer
+          - vehicle-valuator
+          - fraud-detector
+
+env:
+  CONVEX_URL: ${{ secrets.CONVEX_URL }}
+  SAIP_AGENT_TOKEN: ${{ secrets.SAIP_AGENT_TOKEN }}
+  GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+  FB_EMAIL: ${{ secrets.FB_EMAIL }}
+  FB_PASSWORD: ${{ secrets.FB_PASSWORD }}
+
+jobs:
+  lint-and-build:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' || github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npx tsc --noEmit
+      - run: npm run build
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: lint-and-build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Deploy to Vercel
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          working-directory: .
+          vercel-args: '--prod'
+
+  # ========== SCRAPING AGENTS ==========
+  google-search-agent:
+    runs-on: ubuntu-latest
+    if: >
+      github.event.schedule == '0 23 * * *' ||
+      (github.event_name == 'workflow_dispatch' && (inputs.agent == 'google-search' || inputs.agent == 'all'))
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20, cache: npm }
+      - run: npm ci
+      - run: npx playwright install chromium
+      - run: npx tsx agents/google-search.ts
+        env:
+          MAX_KEYWORDS: '25'
+
+  google-maps-agent:
+    runs-on: ubuntu-latest
+    if: >
+      github.event.schedule == '0 23 * * *' ||
+      (github.event_name == 'workflow_dispatch' && (inputs.agent == 'google-maps' || inputs.agent == 'all'))
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20, cache: npm }
+      - run: npm ci
+      - run: npx playwright install chromium
+      - run: npx tsx agents/google-maps.ts
+
+  facebook-agent:
+    runs-on: ubuntu-latest
+    if: >
+      github.event.schedule == '0 */6 * * *' ||
+      (github.event_name == 'workflow_dispatch' && (inputs.agent == 'facebook' || inputs.agent == 'all'))
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20, cache: npm }
+      - run: npm ci
+      - run: npx playwright install chromium
+      - run: npx tsx agents/facebook-listings.ts
+
+  nlp-normalizer:
+    runs-on: ubuntu-latest
+    needs: [facebook-agent]
+    if: always()
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20, cache: npm }
+      - run: npm ci
+      - run: npx tsx agents/nlp-normalizer.ts
+
+  vehicle-valuator:
+    runs-on: ubuntu-latest
+    if: >
+      github.event.schedule == '0 0 * * 0' ||
+      (github.event_name == 'workflow_dispatch' && (inputs.agent == 'vehicle-valuator' || inputs.agent == 'all'))
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20, cache: npm }
+      - run: npm ci
+      - run: npx tsx agents/vehicle-valuator.ts
+
+  fraud-detector:
+    runs-on: ubuntu-latest
+    if: >
+      github.event.schedule == '0 0 * * 0' ||
+      (github.event_name == 'workflow_dispatch' && (inputs.agent == 'fraud-detector' || inputs.agent == 'all'))
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20, cache: npm }
+      - run: npm ci
+      - run: npx tsx agents/fraud-detector.ts
