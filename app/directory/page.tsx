@@ -69,11 +69,16 @@ export default function DirectoryPage() {
         
         {/* Header Section */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 gap-6">
-          <div>
-            <h1 className="text-4xl font-bold font-outfit text-white">Institutional <em>Directory</em></h1>
-            <p className="text-zinc-500 mt-2 text-lg flex items-center gap-2">
-              <ShieldCheck size={20} className="text-[#D4AF37]" /> Verified Automotive Businesses in Somaliland
-            </p>
+          <div className="flex flex-col gap-4">
+            <div className="w-20 h-20 bg-black rounded-2xl border border-zinc-800 flex items-center justify-center p-3">
+               <img src="/logo-somaliland.png" alt="Republic of Somaliland" className="w-14 h-14 object-contain" />
+            </div>
+            <div>
+              <h1 className="text-4xl font-bold font-outfit text-white">Institutional <em>Directory</em></h1>
+              <p className="text-zinc-500 mt-2 text-lg flex items-center gap-2">
+                <ShieldCheck size={20} className="text-[#D4AF37]" /> Verified Automotive Businesses in Somaliland
+              </p>
+            </div>
           </div>
           
           <div className="flex bg-[#18181b] rounded-xl p-1 border border-zinc-800 shadow-xl">
