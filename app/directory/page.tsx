@@ -317,4 +317,4 @@ function StoreIcon({ category }: { category: string }) {
   if (category === 'fuel_station') return <Navigation size={20} />;
   return <Store size={20} />;
 }
-}
+

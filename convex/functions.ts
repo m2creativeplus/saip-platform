@@ -246,9 +246,9 @@ export const searchVehicles = query({
     const q = args.query.toLowerCase();
     const all = await ctx.db.query("vehicleListings").take(500);
     return all.filter(l =>
-      (l.normalizedMake?.toLowerCase().includes(q) || false) ||
-      (l.normalizedModel?.toLowerCase().includes(q) || false) ||
-      (l.rawText?.toLowerCase().includes(q) || false)
+      (l.normalizedMake?.toLowerCase()?.includes(q) ?? false) ||
+      (l.normalizedModel?.toLowerCase()?.includes(q) ?? false) ||
+      (l.rawText?.toLowerCase()?.includes(q) ?? false)
     ).slice(0, 50);
   },
 });
@@ -259,9 +259,9 @@ export const searchBusinesses = query({
     const q = args.query.toLowerCase();
     const all = await ctx.db.query("automotiveBusinesses").take(500);
     return all.filter(b =>
-      (b.name?.toLowerCase().includes(q) || false) ||
-      (b.category?.toLowerCase().includes(q) || false) ||
-      (b.city?.toLowerCase().includes(q) || false)
+      (b.name?.toLowerCase()?.includes(q) ?? false) ||
+      (b.category?.toLowerCase()?.includes(q) ?? false) ||
+      (b.city?.toLowerCase()?.includes(q) ?? false)
     ).slice(0, 50);
   },
 });
