@@ -1,106 +1,118 @@
 "use client";
 import Link from "next/link";
-import { useParams } from "next/navigation";
 
-const VEHICLE_DATA: Record<string, any> = {
-  "SL-49201-M": { make: "Toyota", model: "Vitz", year: 2012, color: "White", mileage: 98000, vin: "JTM1R2EV3GD123456", engine: "1NZ-FE 1.5L", transmission: "CVT", fuel: "Gasoline", status: "active", plate: "SL-49201-M", fraudScore: "low", estimatedValue: 4800, city: "Hargeisa" },
-  "SL-82307-T": { make: "Toyota", model: "Land Cruiser 79", year: 2017, color: "White", mileage: 48000, vin: "JTM8R5EV5JD789012", engine: "1VD-FTV V8 4.5L Turbo Diesel", transmission: "Manual 5-Speed", fuel: "Diesel", status: "active", plate: "SL-82307-T", fraudScore: "low", estimatedValue: 38000, city: "Hargeisa" },
-  "SL-58913-W": { make: "Toyota", model: "Hilux", year: 2018, color: "White", mileage: 55000, vin: "JTM5R6EV7JD345678", engine: "2GD-FTV 2.4L Turbo Diesel", transmission: "Automatic", fuel: "Diesel", status: "active", plate: "SL-58913-W", fraudScore: "low", estimatedValue: 21000, city: "Hargeisa" },
+const VEHICLE = {
+  make: "Toyota", model: "Vitz", year: 2012, color: "White", plate: "SL-49201-M",
+  engine: "1NZ-FE 1.5L", transmission: "CVT", fuel: "Gasoline", vin: "JTM1R2EV3GD123456",
+  status: "active", mileage: 98000, city: "Hargeisa", price: 4800, fraudScore: "LOW",
+  img: "https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=800&h=500&fit=crop",
+  seller: "Hassan Cars", phone: "+252634334455", source: "facebook",
 };
 
-const SERVICE_HISTORY = [
-  { date: "2026-01-15", service: "Oil Change + Filter", shop: "MASS Car Workshop", cost: 45 },
-  { date: "2025-09-22", service: "Brake Pad Replacement", shop: "MASS Car Workshop", cost: 120 },
-  { date: "2025-04-10", service: "Full Service (60K)", shop: "Dahabshiil Motors", cost: 280 },
-  { date: "2024-11-05", service: "Timing Belt Replacement", shop: "Al-Baraka Auto Parts", cost: 350 },
+const SERVICE = [
+  { date: "2025-12-01", type: "Oil Change", shop: "MASS Car Workshop", cost: 35 },
+  { date: "2025-09-15", type: "Tire Rotation", shop: "Burco Tyre Center", cost: 25 },
+  { date: "2025-06-20", type: "Brake Inspection", shop: "MASS Car Workshop", cost: 55 },
+  { date: "2025-03-01", type: "Full Service", shop: "Hargeisa Body Works", cost: 120 },
 ];
 
-export default function VehiclePage() {
-  const params = useParams();
-  const plate = decodeURIComponent(params?.id as string || "SL-49201-M");
-  const vehicle = VEHICLE_DATA[plate] || VEHICLE_DATA["SL-49201-M"];
-
+export default function VehicleProfilePage() {
   return (
-    <div className="min-h-screen">
-      <nav className="nav-glass px-6 py-4">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <span className="text-xl">🚗</span>
-            <span className="font-['Outfit'] text-lg font-bold gold-text">SAIP</span>
-          </Link>
-          <div className="flex gap-6 text-sm">
-            <Link href="/directory" className="text-gray-400 hover:text-white">Directory</Link>
-            <Link href="/marketplace" className="text-gray-400 hover:text-white">Marketplace</Link>
-          </div>
-        </div>
-      </nav>
+    <div>
+      <nav className="navbar"><div className="navbar-inner">
+        <Link href="/" className="nav-logo">🚗 SAIP <span>.sl</span></Link>
+        <ul className="nav-links">
+          <li><Link href="/">Home</Link></li>
+          <li><Link href="/marketplace">Marketplace</Link></li>
+          <li><Link href="/directory">Directory</Link></li>
+          <li><Link href="/admin">Dashboard</Link></li>
+        </ul>
+      </div></nav>
 
-      <div className="max-w-5xl mx-auto px-6 py-10">
-        {/* Header */}
-        <div className="flex items-center gap-4 mb-8">
-          <div className="w-16 h-16 bg-[#D4AF37]/20 rounded-2xl flex items-center justify-center text-3xl">🚗</div>
+      <section className="section">
+        {/* Vehicle Hero */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24, marginBottom: 32 }}>
+          <div style={{ borderRadius: "var(--radius)", overflow: "hidden", border: "1px solid var(--border-light)" }}>
+            <img src={VEHICLE.img} alt={`${VEHICLE.make} ${VEHICLE.model}`} style={{ width: "100%", height: "100%", objectFit: "cover", minHeight: 350 }} />
+          </div>
           <div>
-            <h1 className="font-['Outfit'] text-3xl font-bold">{vehicle.make} {vehicle.model}</h1>
-            <p className="text-gray-500">{vehicle.year} • {vehicle.plate} • {vehicle.city}</p>
-          </div>
-        </div>
+            <h1 style={{ fontFamily: "'Outfit', sans-serif", fontSize: "2.2rem", fontWeight: 900, marginBottom: 8 }}>{VEHICLE.make} {VEHICLE.model}</h1>
+            <p style={{ color: "var(--text-mid)", marginBottom: 20 }}>{VEHICLE.year} • {VEHICLE.plate} • {VEHICLE.city}</p>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-          {/* Estimated Value */}
-          <div className="glass-card p-6 text-center">
-            <div className="text-gray-500 text-sm mb-1">Estimated Market Value</div>
-            <div className="font-['Outfit'] text-4xl font-bold gold-text">${vehicle.estimatedValue.toLocaleString()}</div>
-            <div className="text-xs text-gray-600 mt-1">Based on Hargeisa market data</div>
-          </div>
-          {/* Fraud Score */}
-          <div className="glass-card p-6 text-center">
-            <div className="text-gray-500 text-sm mb-1">Fraud Risk Score</div>
-            <div className={`font-['Outfit'] text-4xl font-bold ${vehicle.fraudScore === "low" ? "text-green-400" : vehicle.fraudScore === "medium" ? "text-yellow-400" : "text-red-400"}`}>
-              {vehicle.fraudScore.toUpperCase()}
+            <div className="stats-row" style={{ gridTemplateColumns: "1fr 1fr 1fr" }}>
+              <div className="stat-box">
+                <div className="stat-label">Market Value</div>
+                <div className="stat-value" style={{ color: "var(--primary)", fontSize: "1.8rem" }}>${VEHICLE.price.toLocaleString()}</div>
+                <div className="stat-change">Based on Hargeisa data</div>
+              </div>
+              <div className="stat-box green">
+                <div className="stat-label">Fraud Risk</div>
+                <div className="stat-value" style={{ color: "#16a34a", fontSize: "1.8rem" }}>{VEHICLE.fraudScore}</div>
+                <div className="stat-change">VIN + mileage verified</div>
+              </div>
+              <div className="stat-box blue">
+                <div className="stat-label">Odometer</div>
+                <div className="stat-value" style={{ fontSize: "1.8rem" }}>{VEHICLE.mileage.toLocaleString()}</div>
+                <div className="stat-change">kilometers</div>
+              </div>
             </div>
-            <div className="text-xs text-gray-600 mt-1">VIN + mileage verified</div>
-          </div>
-          {/* Mileage */}
-          <div className="glass-card p-6 text-center">
-            <div className="text-gray-500 text-sm mb-1">Odometer</div>
-            <div className="font-['Outfit'] text-4xl font-bold text-white">{vehicle.mileage.toLocaleString()}</div>
-            <div className="text-xs text-gray-600 mt-1">kilometers</div>
+
+            <div style={{ display: "flex", gap: 12, marginTop: 24 }}>
+              <a href={`tel:${VEHICLE.phone}`} className="btn-details" style={{ flex: 1, justifyContent: "center" }}>📞 Call Seller</a>
+              <button className="btn-outline" style={{ flex: 1 }}>💬 WhatsApp</button>
+            </div>
           </div>
         </div>
 
         {/* Specifications */}
-        <div className="glass-card p-6 mb-8">
-          <h2 className="font-['Outfit'] text-lg font-bold mb-4">Vehicle Specifications</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-            {[
-              ["Make", vehicle.make], ["Model", vehicle.model], ["Year", vehicle.year],
-              ["Color", vehicle.color], ["Engine", vehicle.engine], ["Transmission", vehicle.transmission],
-              ["Fuel", vehicle.fuel], ["VIN", vehicle.vin], ["Plate", vehicle.plate], ["Status", vehicle.status],
-            ].map(([label, val]) => (
-              <div key={label as string} className="p-3 bg-white/5 rounded-lg">
-                <div className="text-gray-500 text-xs mb-1">{label}</div>
-                <div className="font-medium text-white truncate">{val}</div>
-              </div>
-            ))}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
+          <div style={{ background: "var(--bg-white)", border: "1px solid var(--border-light)", borderRadius: "var(--radius)", padding: 24 }}>
+            <h3 style={{ fontWeight: 700, marginBottom: 16 }}>Vehicle Specifications</h3>
+            <table style={{ width: "100%" }}>
+              <tbody>
+                {[
+                  ["Make", VEHICLE.make], ["Model", VEHICLE.model], ["Year", VEHICLE.year],
+                  ["Color", VEHICLE.color], ["Engine", VEHICLE.engine], ["Transmission", VEHICLE.transmission],
+                  ["Fuel", VEHICLE.fuel], ["VIN", VEHICLE.vin], ["Plate", VEHICLE.plate], ["Status", VEHICLE.status],
+                ].map(([k, v], i) => (
+                  <tr key={i} style={{ borderBottom: "1px solid #f3f4f6" }}>
+                    <td style={{ padding: "10px 0", fontWeight: 500, color: "var(--text-light)", width: "40%" }}>{k}</td>
+                    <td style={{ padding: "10px 0", fontWeight: 600 }}>{String(v)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <div style={{ background: "var(--bg-white)", border: "1px solid var(--border-light)", borderRadius: "var(--radius)", padding: 24 }}>
+            <h3 style={{ fontWeight: 700, marginBottom: 16 }}>Service History</h3>
+            <table className="data-table">
+              <thead><tr><th>Date</th><th>Service</th><th>Shop</th><th>Cost</th></tr></thead>
+              <tbody>
+                {SERVICE.map((s, i) => (
+                  <tr key={i}>
+                    <td>{s.date}</td>
+                    <td style={{ fontWeight: 600 }}>{s.type}</td>
+                    <td>{s.shop}</td>
+                    <td style={{ color: "var(--primary)", fontWeight: 600 }}>${s.cost}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
 
-        {/* Service History */}
-        <div className="glass-card p-6">
-          <h2 className="font-['Outfit'] text-lg font-bold mb-4">Service History</h2>
-          <div className="space-y-3">
-            {SERVICE_HISTORY.map((s, i) => (
-              <div key={i} className="flex items-center justify-between py-3 border-b border-white/5 last:border-0">
-                <div>
-                  <div className="font-medium">{s.service}</div>
-                  <div className="text-sm text-gray-500">{s.shop} • {s.date}</div>
-                </div>
-                <div className="text-[#D4AF37] font-semibold">${s.cost}</div>
-              </div>
-            ))}
+        {/* Seller Info */}
+        <div style={{ marginTop: 24, background: "var(--bg-white)", border: "1px solid var(--border-light)", borderRadius: "var(--radius)", padding: 24, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div>
+            <h3 style={{ fontWeight: 700, marginBottom: 4 }}>Listed by: {VEHICLE.seller}</h3>
+            <p style={{ color: "var(--text-mid)", fontSize: "0.9rem" }}>{VEHICLE.phone} • Found on {VEHICLE.source}</p>
           </div>
+          <Link href="/marketplace" className="btn-outline">← Back to Marketplace</Link>
         </div>
-      </div>
+      </section>
+
+      <footer className="footer"><p><strong>SAIP</strong> — Somaliland Automotive Intelligence Platform • Built by <strong>M2 Creative & Consulting</strong></p></footer>
     </div>
   );
 }

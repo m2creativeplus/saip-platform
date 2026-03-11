@@ -3,19 +3,17 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "SAIP — Somaliland Automotive Intelligence Platform",
-  description: "The largest automotive business and vehicle data platform in the Republic of Somaliland. Search vehicles, dealers, spare parts, garages, and more.",
-  keywords: ["Somaliland", "automotive", "car dealer", "Hargeisa", "vehicle", "spare parts", "garage", "SAIP"],
+  description: "Discover vehicles, dealers, spare parts, garages, and automotive services across the Republic of Somaliland. The largest automotive directory and marketplace.",
+  keywords: ["Somaliland", "automotive", "car dealer", "Hargeisa", "vehicle", "spare parts", "garage", "SAIP", "gaadhi iib ah"],
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en">
       <head>
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
       </head>
-      <body className="min-h-screen bg-[#0a0a0f] text-white antialiased font-['Inter']">
-        {children}
-      </body>
+      <body>{children}</body>
     </html>
   );
 }
