@@ -24,11 +24,14 @@ export const insertListing = mutation({
     postUrl: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
+    const { make, model, ...rest } = args;
     return ctx.db.insert("vehicleListings", {
-      ...args,
+      ...rest,
+      make,
+      model,
       priceSlsh: args.priceUsd ? args.priceUsd * 9000 : undefined,
-      normalizedMake: args.make,
-      normalizedModel: args.model,
+      normalizedMake: make || undefined,
+      normalizedModel: model || undefined,
       isActive: true,
       scrapedAt: new Date().toISOString(),
     });
@@ -36,17 +39,31 @@ export const insertListing = mutation({
 });
 
 export const getListings = query({
-  args: { city: v.optional(v.string()), source: v.optional(v.string()), limit: v.optional(v.number()) },
+  args: { 
+    city: v.optional(v.string()), 
+    source: v.optional(v.string()), 
+    limit: v.optional(v.number()),
+    unnormalizedOnly: v.optional(v.boolean()) 
+  },
   handler: async (ctx, args) => {
+    if (args.unnormalizedOnly) {
+        const results = await ctx.db.query("vehicleListings").collect();
+        return results
+          .filter(l => !l.normalizedMake)
+          .slice(0, args.limit || 50);
+    }
+
+    let q = ctx.db.query("vehicleListings")
+      .filter(q => q.eq(q.field("isActive"), true));
+    
     if (args.city) {
-      return ctx.db.query("vehicleListings")
+      return q
         .withIndex("by_city", q => q.eq("city", args.city!))
-        .filter(q => q.eq(q.field("isActive"), true))
         .order("desc")
         .take(args.limit || 50);
     }
-    return ctx.db.query("vehicleListings")
-      .filter(q => q.eq(q.field("isActive"), true))
+
+    return q
       .order("desc")
       .take(args.limit || 50);
   },
@@ -58,6 +75,43 @@ export const getListingsByMake = query({
     return ctx.db.query("vehicleListings")
       .withIndex("by_make", q => q.eq("normalizedMake", args.make))
       .take(50);
+  },
+});
+
+export const updateListing = mutation({
+  args: {
+    id: v.id("vehicleListings"),
+    make: v.optional(v.string()),
+    model: v.optional(v.string()),
+    year: v.optional(v.number()),
+    priceUsd: v.optional(v.number()),
+    city: v.optional(v.string()),
+    phone: v.optional(v.string()),
+    normalizedMake: v.optional(v.string()),
+    normalizedModel: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const { id, ...updates } = args;
+    const existing = await ctx.db.get(id);
+    if (!existing) throw new Error("Listing not found");
+
+    return ctx.db.patch(id, {
+      ...updates,
+      priceSlsh: updates.priceUsd ? updates.priceUsd * 9000 : existing.priceSlsh,
+      normalizedMake: updates.normalizedMake || updates.make || existing.normalizedMake,
+      normalizedModel: updates.normalizedModel || updates.model || existing.normalizedModel,
+    });
+  },
+});
+
+export const getUnnormalizedListings = query({
+  args: { limit: v.optional(v.number()) },
+  handler: async (ctx, args) => {
+    const listings = await ctx.db.query("vehicleListings").collect();
+    // Filter in JS if complex null/undefined checks are needed, or use specific filter
+    return listings
+      .filter((l) => !l.normalizedMake)
+      .slice(0, args.limit || 100);
   },
 });
 

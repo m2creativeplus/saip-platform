@@ -1,0 +1,130 @@
+
+import { ConvexClient } from "convex/browser";
+import { api } from "./convex/_generated/api";
+import * as dotenv from "dotenv";
+
+dotenv.config({ path: ".env.local" });
+
+const client = new ConvexClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
+
+async function seed() {
+  console.log("🚀 Starting Sovereign Data Seeding...");
+
+  // 1. Seed Listings
+  const listings = [
+    {
+      source: "manual",
+      rawText: "Toyota Land Cruiser V8 2022, White, Full Options, Berbera Port import.",
+      images: ["https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=800"],
+      make: "Toyota",
+      model: "Land Cruiser",
+      year: 2022,
+      priceUsd: 85000,
+      city: "Hargeisa",
+      location: "Diamond Motors, Hargeisa",
+    },
+    {
+      source: "facebook",
+      rawText: "Nissan Patrol 2021 available for sale in Burco. Excellent condition.",
+      images: ["https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?w=800"],
+      make: "Nissan",
+      model: "Patrol",
+      year: 2021,
+      priceUsd: 62000,
+      city: "Burco",
+      location: "Burco Auto Market",
+    },
+    {
+      source: "manual",
+      rawText: "Honda CR-V 2020, Silver, Low mileage.",
+      images: ["https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?w=800"],
+      make: "Honda",
+      model: "CR-V",
+      year: 2020,
+      priceUsd: 28000,
+      city: "Hargeisa",
+      location: "Jigjiga Yar, Hargeisa",
+    },
+    {
+      source: "manual",
+      rawText: "Suzuki Vitara 2023, Grey, Brand New.",
+      images: ["https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?w=800"],
+      make: "Suzuki",
+      model: "Vitara",
+      year: 2023,
+      priceUsd: 32000,
+      city: "Hargeisa",
+      location: "Somaliland Suzuki Center",
+    }
+  ];
+
+  for (const l of listings) {
+    try {
+      await client.mutation(api.functions.insertListing, l as any);
+      console.log(`✅ Seeded Listing: ${l.make} ${l.model}`);
+    } catch (e) {
+      console.error(`❌ Error seeding listing:`, e);
+    }
+  }
+
+  // 2. Seed Businesses
+  const businesses = [
+    {
+      name: "Somaliland National Printing Agency (SNPA)",
+      category: "other",
+      city: "Hargeisa",
+      address: "Downtown, Hargeisa",
+      phone: "+252 63 XXXXXXX",
+      source: "manual",
+      latitude: 9.562,
+      longitude: 44.065,
+      rating: 5,
+    },
+    {
+      name: "Guurti EPD Comms Hub",
+      category: "other",
+      city: "Hargeisa",
+      address: "National Assembly, Hargeisa",
+      phone: "+252 63 XXXXXXX",
+      source: "manual",
+      latitude: 9.565,
+      longitude: 44.070,
+      rating: 5,
+    },
+    {
+      name: "Diamond Motors Somaliland",
+      category: "car_dealer",
+      city: "Hargeisa",
+      address: "Airport Road, Hargeisa",
+      phone: "+252 63 XXXXXXX",
+      source: "google_maps",
+      latitude: 9.550,
+      longitude: 44.080,
+      rating: 4.8,
+    },
+    {
+      name: "Berbera Logistics Hub",
+      category: "fleet_operator",
+      city: "Berbera",
+      address: "Berbera Port Area",
+      phone: "+252 63 XXXXXXX",
+      source: "manual",
+      latitude: 10.439,
+      longitude: 45.011,
+      rating: 4.5,
+    }
+  ];
+
+  for (const b of businesses) {
+    try {
+      await client.mutation(api.functions.insertBusiness, b as any);
+      console.log(`✅ Seeded Business: ${b.name}`);
+    } catch (e) {
+      console.error(`❌ Error seeding business:`, e);
+    }
+  }
+
+  console.log("🏁 Seeding Complete.");
+}
+
+seed();

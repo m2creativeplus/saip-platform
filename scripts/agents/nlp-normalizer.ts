@@ -7,7 +7,7 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY!;
-const CONVEX_URL = process.env.CONVEX_URL!;
+const CONVEX_SITE_URL = process.env.CONVEX_SITE_URL!; // Use .site for HTTP actions
 const INGEST_TOKEN = process.env.SAIP_AGENT_TOKEN!;
 
 const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
@@ -79,16 +79,25 @@ Note: "gaadhi"/"baabuur" = car, "iib ah" = for sale`;
 
 async function main() {
   console.log("🧠 NLP Normalizer Agent starting...");
-  const response = await fetch(`${CONVEX_URL}/api/get-unnormalized-listings`, {
+  // Use getListings with unnormalizedOnly=true since get-unnormalized-listings is failing to deploy
+  const queryParams = new URLSearchParams({ unnormalizedOnly: "true" });
+  const response = await fetch(`${CONVEX_SITE_URL}/api/get-listings?${queryParams.toString()}`, {
     headers: { Authorization: `Bearer ${INGEST_TOKEN}` },
   });
+  
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error(`❌ Fetch failed (${response.status}): ${errorText}`);
+    return;
+  }
+
   const listings: Array<{ _id: string; rawText: string }> = await response.json();
   console.log(`📋 ${listings.length} listings to normalize`);
 
   for (const listing of listings) {
     const local = normalizeVehicleName(listing.rawText);
     const normalized = local.make ? local : await normalizeWithGemini(listing.rawText);
-    await fetch(`${CONVEX_URL}/api/update-listing`, {
+    await fetch(`${CONVEX_SITE_URL}/api/update-listing`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${INGEST_TOKEN}` },
       body: JSON.stringify({ id: listing._id, ...normalized }),

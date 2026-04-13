@@ -10,31 +10,25 @@
    ============================================ */
 
 :root {
-  /* M2 Premium Institutional Aesthetic - Dark Mode */
+  /* M2 Premium Ultimate Aesthetic - Pure Black Mode */
   --primary: #D4AF37; /* M2 Sovereign Gold */
   --primary-rgb: 212, 175, 55;
   --primary-dark: #b5952f;
   --primary-light: #f5cf53;
-  --bg-main: #0A0A0A; /* Deep Dark */
-  --bg-white: rgba(20, 20, 20, 0.65); /* Glass Background */
-  --bg-card: #18181b; /* Solid Card Dark */
-  --text-dark: #f8f9fa; /* Light Text */
-  --text-mid: #a1a1aa;
-  --text-light: #71717a;
-  --border-light: rgba(255, 255, 255, 0.08);
-  --border-mid: rgba(255, 255, 255, 0.15);
-  --accent-green: #16a34a;
-  --accent-blue: #3b82f6;
-  --accent-amber: #f59e0b;
-  --accent-red: #990000; /* Deep Red for Institutional Actions */
-  --shadow-sm: 0 4px 12px rgba(0,0,0,0.5);
-  --shadow-md: 0 8px 30px rgba(0,0,0,0.6);
-  --shadow-lg: 0 16px 40px rgba(0,0,0,0.8);
-  --shadow-card: 0 4px 20px rgba(0,0,0,0.5);
-  --shadow-gold: 0 0 20px rgba(212, 175, 55, 0.15);
-  --radius: 12px;
-  --radius-sm: 8px;
-  --radius-lg: 16px;
+  --bg-main: #050505; /* Ultimate Pure Black */
+  --bg-surface: #0A0A0B; /* Elevated Surface */
+  --bg-card: #0D0D0E; /* Card Dark */
+  --bg-glass: rgba(10, 10, 11, 0.7);
+  --text-dark: #FFFFFF; /* High Contrast White */
+  --text-mid: #A1A1AA;
+  --text-light: #71717A;
+  --border-subtle: rgba(255, 255, 255, 0.05);
+  --border-glow: rgba(212, 175, 55, 0.2);
+  --accent-gold: #F59E0B;
+  --accent-blue: #2563EB;
+  --accent-red: #B91C1C;
+  --shadow-premium: 0 0 40px rgba(0, 0, 0, 0.8), 0 0 20px rgba(212, 175, 55, 0.05);
+  --radius: 8px; /* Sharper, more precision feel */
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -577,8 +571,80 @@ body {
   .nav-links { display: none; }
 }
 
-/* ============ SCROLLBAR ============ */
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: var(--bg-main); }
-::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: var(--primary); }
+/* ============ PREMIUM UTILITIES (Ultimate Benchmark) ============ */
+.glass-panel {
+  background: var(--bg-glass);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border-subtle);
+}
+
+.text-gradient-gold {
+  background: linear-gradient(135deg, #FFF 0%, var(--primary) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.gold-glow {
+  box-shadow: 0 0 20px rgba(245, 158, 11, 0.1);
+}
+
+.auth-split {
+  display: flex;
+  min-height: 100vh;
+  background: var(--bg-main);
+}
+
+.auth-left {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  position: relative;
+  z-index: 10;
+}
+
+.auth-right {
+  flex: 1;
+  background: radial-gradient(circle at 70% 30%, rgba(37, 99, 235, 0.05) 0%, transparent 50%),
+              radial-gradient(circle at 30% 70%, rgba(245, 158, 11, 0.05) 0%, transparent 50%);
+  display: none; /* Hide on mobile */
+  padding: 80px;
+  border-left: 1px solid var(--border-subtle);
+  flex-direction: column;
+  justify-content: center;
+}
+
+@media (min-width: 1024px) {
+  .auth-right {
+    display: flex;
+  }
+}
+
+.feature-line {
+  position: relative;
+  padding-left: 40px;
+}
+
+.feature-line::before {
+  content: '';
+  position: absolute;
+  left: 15px;
+  top: 10px;
+  bottom: 10px;
+  width: 1px;
+  background: linear-gradient(to bottom, var(--primary), transparent);
+}
+
+.feature-dot {
+  position: absolute;
+  left: 10px;
+  top: 0;
+  width: 11px;
+  height: 11px;
+  background: var(--bg-main);
+  border: 2px solid var(--primary);
+  border-radius: 50%;
+  box-shadow: 0 0 10px var(--primary);
+}
