@@ -78,7 +78,7 @@ jobs:
         with: { node-version: 20, cache: npm }
       - run: npm ci
       - run: npx playwright install chromium
-      - run: npx tsx agents/google-search.ts
+      - run: npx tsx scripts/agents/google-search.ts
         env:
           MAX_KEYWORDS: '25'
 
@@ -93,7 +93,7 @@ jobs:
         with: { node-version: 20, cache: npm }
       - run: npm ci
       - run: npx playwright install chromium
-      - run: npx tsx agents/google-maps.ts
+      - run: npx tsx scripts/agents/google-maps.ts
 
   facebook-agent:
     runs-on: ubuntu-latest
@@ -106,7 +106,7 @@ jobs:
         with: { node-version: 20, cache: npm }
       - run: npm ci
       - run: npx playwright install chromium
-      - run: npx tsx agents/facebook-listings.ts
+      - run: npx tsx scripts/agents/facebook-listings.ts
 
   nlp-normalizer:
     runs-on: ubuntu-latest
@@ -117,7 +117,7 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: 20, cache: npm }
       - run: npm ci
-      - run: npx tsx agents/nlp-normalizer.ts
+      - run: npx tsx scripts/agents/nlp-normalizer.ts
 
   vehicle-valuator:
     runs-on: ubuntu-latest
@@ -129,7 +129,7 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: 20, cache: npm }
       - run: npm ci
-      - run: npx tsx agents/vehicle-valuator.ts
+      - run: npx tsx scripts/agents/vehicle-valuator.ts
 
   fraud-detector:
     runs-on: ubuntu-latest
@@ -141,4 +141,4 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: 20, cache: npm }
       - run: npm ci
-      - run: npx tsx agents/fraud-detector.ts
+      - run: npx tsx scripts/agents/fraud-detector.ts
